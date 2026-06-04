@@ -80,8 +80,8 @@ Route::get('/dashboard/submissions', [WaiverController::class, 'mySubmissions'])
 
 // ── Chat ──────────────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
-    // Route::get('/chat',                        [ChatController::class, 'index'])->name('chat.index');
-    // Route::get('/chat/{user}',                 [ChatController::class, 'show'])->name('chat.show');
+    Route::get('/chat',                        [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/{user}',                 [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{conversation}/send',   [ChatController::class, 'send'])->name('chat.send');
 });
 Route::post('/chat/{conversation}/typing', [ChatController::class, 'typing'])->name('chat.typing');
@@ -108,7 +108,7 @@ Route::post('/sign/{token}', [App\Http\Controllers\WaiverController::class, 'sub
 Route::post('/sign/{token}', [WaiverController::class, 'saveSign'])
     ->name('waiver.sign.save');
     Route::middleware('auth')->group(function () {
-    // Route::resource('groups', GroupController::class);
+    Route::resource('groups', GroupController::class);
     Route::post('groups/{group}/messages', [GroupMessageController::class, 'store'])
          ->name('groups.messages.store');
     Route::post('groups/{group}/members', [GroupController::class, 'addMember'])
