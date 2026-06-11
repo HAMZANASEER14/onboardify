@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\Profile;
 use Laravel\Cashier\Billable;
 use App\Models\Group;
+use App\Notifications\VerifyEmailNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -68,5 +69,9 @@ public function groups()
     return $this->belongsToMany(Group::class, 'group_members')
                 ->withPivot('role', 'joined_at')
                 ->withTimestamps();
+}
+public function sendEmailVerificationNotification(): void
+{
+    $this->notify(new VerifyEmailNotification());
 }
 }

@@ -8,7 +8,8 @@ class Waiver extends Model
 {
   protected $fillable = [
      'user_id',        
-        'title',          
+        'title', 
+        'pdf_document',         
     'fields',  // ✅ add this
     'status', 'slug', 'require_signature'
 ];
@@ -20,5 +21,14 @@ protected $casts = [
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function sends()
+    {
+        return $this->hasMany(WaiverSend::class);
+    }
+
+    public function submissions()
+    {
+        return $this->hasMany(WaiverSubmission::class);
     }
 }

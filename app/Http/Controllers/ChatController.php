@@ -62,7 +62,7 @@ class ChatController extends Controller
         $message->load('user');
 
         // Push to both users via Reverb
-        broadcast(new MessageSent($message));
+        broadcast(new MessageSent($message))->toOthers();
 
         return response()->json([
             'id'          => $message->id,

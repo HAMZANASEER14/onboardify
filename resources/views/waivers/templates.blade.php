@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Client – Onboardify</title>
+    <title>Templates – Onboardify</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%232563eb'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -15,11 +15,8 @@
         .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #1b6ca8;
-            box-shadow: 0 0 0 3px rgba(27,108,168,0.1);
-        }
+        .template-card:hover .use-btn { opacity: 1; transform: translateY(0); }
+        .use-btn { opacity: 0; transform: translateY(6px); transition: all 0.2s; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-900 min-h-screen flex font-sans antialiased">
@@ -74,13 +71,13 @@
                 </svg>
                 Documents
             </a>
-            <a href="{{ route('clients.index') }}" class="nav-active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium">
+            <a href="{{ route('clients.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
                 Clients
             </a>
-            <a href="{{ route('templates.index') }}" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium">
+            <a href="{{ route('templates.index') }}" class="nav-active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                 </svg>
@@ -131,172 +128,146 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
-            <h1 class="text-sm font-semibold text-gray-500 hidden md:block">
-                Home / <a href="{{ route('clients.index') }}" class="hover:text-gray-700">Clients</a> / <span class="text-gray-900">Add Client</span>
-            </h1>
+            <h1 class="text-sm font-semibold text-gray-500 hidden md:block">Home / <span class="text-gray-900">Templates</span></h1>
             <div class="flex items-center gap-3 ml-auto">
-                <a href="{{ route('clients.index') }}"
-                   class="flex items-center gap-1.5 text-gray-600 text-sm font-medium px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition">
+                <a href="{{ route('waivers.create') }}"
+                   class="flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-lg transition shadow-sm"
+                   style="background: linear-gradient(135deg, #1b6ca8, #0a9396)">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Back to Clients
+                    New Waiver
                 </a>
             </div>
         </header>
 
         <div class="flex-1 p-4 md:p-8">
 
+            @if(session('success'))
+                <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    {{ session('success') }}
+                </div>
+            @endif
+
             {{-- Page Title --}}
             <div class="mb-8">
-                <h2 class="text-2xl font-bold text-gray-900">Add New Client</h2>
-                <p class="text-gray-500 text-sm mt-1">Fill in the details below to add a client to your account.</p>
+                <h2 class="text-2xl font-bold text-gray-900">Ready-Made Templates</h2>
+                <p class="text-gray-500 text-sm mt-1">Pick a template, customize it, and start sending in minutes.</p>
             </div>
 
-            <div class="max-w-2xl">
+            {{-- Category Filter --}}
+            <div class="flex items-center gap-2 mb-6 flex-wrap">
+                <button onclick="filterCategory('all')" id="filter-all"
+                    class="filter-btn active-filter px-4 py-1.5 rounded-full text-sm font-medium transition"
+                    style="background: linear-gradient(135deg, #1b6ca8, #0a9396); color: white;">
+                    All
+                </button>
+                @foreach($templates->pluck('category')->unique() as $cat)
+                <button onclick="filterCategory('{{ $cat }}')"
+                    class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-700 transition"
+                    data-category="{{ $cat }}">
+                    {{ $cat }}
+                </button>
+                @endforeach
+            </div>
 
-                {{-- Validation Errors --}}
-                @if($errors->any())
-                    <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-6">
-                        <div class="flex items-center gap-2 mb-1 font-semibold">
-                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Please fix the following errors:
+            {{-- Templates Grid --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="templates-grid">
+                @foreach($templates as $template)
+                @php
+                    $colors = [
+                        'blue'   => ['bg' => 'bg-blue-50',   'icon' => 'bg-blue-100',   'text' => 'text-blue-600',   'badge' => 'bg-blue-100 text-blue-700'],
+                        'orange' => ['bg' => 'bg-orange-50', 'icon' => 'bg-orange-100', 'text' => 'text-orange-600', 'badge' => 'bg-orange-100 text-orange-700'],
+                        'teal'   => ['bg' => 'bg-teal-50',   'icon' => 'bg-teal-100',   'text' => 'text-teal-600',   'badge' => 'bg-teal-100 text-teal-700'],
+                        'purple' => ['bg' => 'bg-purple-50', 'icon' => 'bg-purple-100', 'text' => 'text-purple-600', 'badge' => 'bg-purple-100 text-purple-700'],
+                        'green'  => ['bg' => 'bg-green-50',  'icon' => 'bg-green-100',  'text' => 'text-green-600',  'badge' => 'bg-green-100 text-green-700'],
+                        'yellow' => ['bg' => 'bg-yellow-50', 'icon' => 'bg-yellow-100', 'text' => 'text-yellow-600', 'badge' => 'bg-yellow-100 text-yellow-700'],
+                    ];
+                    $c = $colors[$template['color']] ?? $colors['blue'];
+                @endphp
+                <div class="template-card bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
+                     data-category="{{ $template['category'] }}">
+
+                    {{-- Card Top --}}
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 {{ $c['icon'] }} rounded-xl flex items-center justify-center text-2xl">
+                                {{ $template['icon'] }}
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full {{ $c['badge'] }}">
+                                {{ $template['category'] }}
+                            </span>
                         </div>
-                        @foreach($errors->all() as $error)
-                            <p class="ml-6 text-xs">• {{ $error }}</p>
-                        @endforeach
+
+                        <h3 class="font-bold text-gray-900 text-base mb-1">{{ $template['title'] }}</h3>
+                        <p class="text-gray-500 text-xs leading-relaxed mb-4">{{ $template['description'] }}</p>
+
+                        {{-- Fields Preview --}}
+                        <div class="space-y-1.5 mb-5">
+                            @foreach(array_slice($template['fields'], 0, 3) as $field)
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-1.5 rounded-full {{ $c['text'] }} bg-current shrink-0"></div>
+                                <span class="text-xs text-gray-500">{{ $field['label'] }}</span>
+                                @if($field['required'])
+                                    <span class="text-red-400 text-[10px]">*</span>
+                                @endif
+                            </div>
+                            @endforeach
+                            @if(count($template['fields']) > 3)
+                            <div class="flex items-center gap-2">
+                                <div class="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0"></div>
+                                <span class="text-xs text-gray-400">+{{ count($template['fields']) - 3 }} more fields</span>
+                            </div>
+                            @endif
+                        </div>
+
+                        {{-- Field count --}}
+                        <div class="flex items-center gap-3 text-xs text-gray-400">
+                            <span class="flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                {{ count($template['fields']) }} fields
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                </svg>
+                                Signature required
+                            </span>
+                        </div>
                     </div>
-                @endif
 
-                {{-- Form Card --}}
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-
-                    {{-- Card Header --}}
-                    <div class="px-6 py-5 border-b border-gray-100 flex items-center gap-3"
-                         style="background: linear-gradient(135deg, rgba(27,108,168,0.05), rgba(10,147,150,0.05))">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                             style="background: linear-gradient(135deg, #1b6ca8, #0a9396)">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="font-bold text-gray-900 text-sm">Client Information</div>
-                            <div class="text-gray-400 text-xs">Basic contact details for this client</div>
-                        </div>
-                    </div>
-
-                    {{-- Form Body --}}
-                    <form action="{{ route('clients.store') }}" method="POST" class="p-6 space-y-5">
-                        @csrf
-
-                        {{-- Full Name --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Full Name <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
-                                <input type="text" name="name"
-                                       value="{{ old('name') }}"
-                                       placeholder="John Doe"
-                                       required
-                                       class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl transition">
-                            </div>
-                        </div>
-
-                        {{-- Email --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Email Address <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                </svg>
-                                <input type="email" name="email"
-                                       value="{{ old('email') }}"
-                                       placeholder="john@example.com"
-                                       required
-                                       class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl transition">
-                            </div>
-                        </div>
-
-                        {{-- Phone --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                                Phone <span class="text-gray-400 text-xs font-normal">(optional)</span>
-                            </label>
-                            <div class="relative">
-                                <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                                </svg>
-                                <input type="text" name="phone"
-                                       value="{{ old('phone') }}"
-                                       placeholder="+1 234 567 8900"
-                                       class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl transition">
-                            </div>
-                        </div>
-
-                        {{-- Divider --}}
-                        <div class="border-t border-gray-100 pt-5">
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                                     style="background: linear-gradient(135deg, #0a9396, #14b8a6)">
-                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div class="text-sm font-semibold text-gray-700">Send a Waiver</div>
-                                    <div class="text-xs text-gray-400">Optionally send a waiver to this client right away</div>
-                                </div>
-                            </div>
-
-                            {{-- Waiver Select --}}
-                            <div class="relative">
-                                <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                <select name="waiver_id"
-                                        class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl transition appearance-none">
-                                    <option value="">— No waiver —</option>
-                                    @foreach($waivers as $waiver)
-                                        <option value="{{ $waiver->id }}" {{ old('waiver_id') == $waiver->id ? 'selected' : '' }}>
-                                            {{ $waiver->title }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <svg class="w-4 h-4 text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </div>
-                        </div>
-
-                        {{-- Actions --}}
-                        <div class="flex items-center gap-3 pt-2">
+                    {{-- Card Footer --}}
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                        <span class="text-xs text-gray-400">Free template</span>
+                        <form action="{{ route('templates.use', $template['id']) }}" method="POST">
+                            @csrf
                             <button type="submit"
-                                    class="flex-1 flex items-center justify-center gap-2 text-white text-sm font-semibold py-3 rounded-xl transition shadow-sm"
-                                    style="background: linear-gradient(135deg, #1b6ca8, #0a9396)">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                class="use-btn flex items-center gap-1.5 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow-sm"
+                                style="background: linear-gradient(135deg, #1b6ca8, #0a9396)">
+                                Use Template
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
-                                Add Client
                             </button>
-                            <a href="{{ route('clients.index') }}"
-                               class="px-5 py-3 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition">
-                                Cancel
-                            </a>
-                        </div>
-
-                    </form>
+                        </form>
+                    </div>
                 </div>
-
+                @endforeach
             </div>
+
+            {{-- Empty state if no templates match filter --}}
+            <div id="no-results" class="hidden text-center py-16">
+                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <p class="text-gray-500 font-medium">No templates in this category</p>
+            </div>
+
         </div>
     </main>
 
@@ -311,6 +282,7 @@
     </a>
 
     <script>
+        // Sidebar
         document.addEventListener('DOMContentLoaded', function () {
             const mobileMenuBtn = document.getElementById('mobile-menu-btn');
             const closeSidebarBtn = document.getElementById('close-sidebar');
@@ -324,6 +296,41 @@
             if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
             if (overlay) overlay.addEventListener('click', toggleSidebar);
         });
+
+        // Category filter
+        function filterCategory(category) {
+            const cards = document.querySelectorAll('.template-card');
+            const btns = document.querySelectorAll('.filter-btn');
+            let visible = 0;
+
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = '';
+                    visible++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Update button styles
+            btns.forEach(btn => {
+                btn.style.background = '';
+                btn.style.color = '';
+                btn.classList.remove('text-white');
+                btn.classList.add('bg-white', 'text-gray-600');
+            });
+
+            const activeBtn = category === 'all'
+                ? document.getElementById('filter-all')
+                : document.querySelector(`[data-category="${category}"]`);
+
+            if (activeBtn) {
+                activeBtn.style.background = 'linear-gradient(135deg, #1b6ca8, #0a9396)';
+                activeBtn.style.color = 'white';
+            }
+
+            document.getElementById('no-results').classList.toggle('hidden', visible > 0);
+        }
     </script>
 
 </body>

@@ -79,9 +79,14 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'min:8', 'confirmed'],
+            'name'     => ['required', 'string','min:3', 'max:255','regex:/^[a-zA-Z\s]+$/',],
+            'email'    => ['required', 'email', 'max:255', 'unique:users,email',],
+            'password' => [
+        'required',
+        'min:8',
+        'confirmed',
+        'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_\-#])[A-Za-z\d@$!%*?&_\-#]{8,}$/',
+    ],
         ]);
 
         $user = User::create([
@@ -99,10 +104,15 @@ class AuthController extends Controller
 
     // ── Logout ────────────────────────────────────────────────────
     public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect()->route('login');
-    }
+{
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('login')->withHeaders([
+        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma'        => 'no-cache',
+        'Expires'       => 'Sat, 01 Jan 2000 00:00:00 GMT',
+    ]);
+}
 }
