@@ -18,6 +18,7 @@ class WaiverSubmission extends Model
 
    protected $casts = [
     'responses' => 'array',
+    
 ];
 
 public function client()

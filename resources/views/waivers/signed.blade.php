@@ -1,17 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Waiver Signed</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%232563eb'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'/></svg>">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiver Signed – {{ $waiver->title }}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%230B3D2E'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'/></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body style="font-family:sans-serif; text-align:center; padding:80px 20px">
-    <div style="font-size:60px">✅</div>
-    <h1 style="color:#6366f1">Thank You!</h1>
-    <p style="color:#6b7280; font-size:16px">
-        You have successfully signed the waiver.
+<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center px-4">
+
+    <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-10 max-w-md w-full text-center">
+
+        {{-- Success icon --}}
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
+             style="background: linear-gradient(135deg, #0B3D2E, #2D6A4F)">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Successfully Signed!</h1>
+        <p class="text-gray-500 text-sm mb-1">
+            <strong class="text-gray-700">{{ $waiver->title }}</strong> has been signed.
+        </p>
+        <p class="text-gray-400 text-xs mb-6">
+            Signed on {{ now()->format('F d, Y \a\t h:i A') }}
+        </p>
+
+        {{-- Signature preview --}}
+        @if($send->submission && $send->submission->signature)
+        <div class="border border-gray-100 rounded-xl p-4 mb-6 bg-gray-50">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Your Signature</p>
+            <img src="{{ $send->submission->signature }}"
+                 alt="Signature"
+                 class="max-h-20 mx-auto">
+        </div>
+        @endif
+
+        <p class="text-gray-400 text-xs">You may now close this window.</p>
+
+    </div>
+
+    <p class="text-center text-xs text-gray-400 mt-6">
+        Powered by <span class="font-semibold" style="color:#2D6A4F">Onboardify</span>
     </p>
-    <p style="color:#9ca3af; font-size:14px">
-        You may now close this window.
-    </p>
+
 </body>
 </html>

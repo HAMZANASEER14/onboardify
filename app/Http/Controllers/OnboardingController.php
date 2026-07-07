@@ -2,46 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\SaveUseCaseRequest;
+use App\Repositories\Contracts\OnboardingRepositoryInterface;
 
 class OnboardingController extends Controller
 {
+    public function __construct(private OnboardingRepositoryInterface $onboarding) {}
+
     public function useCase()
-{
-    return view('onboarding.use-case');
-}
-// public function saveUseCase(Request $request)
-// {
-//     $request->validate([
-//         'business_type' => 'required'
-//     ]);
+    {
+        return view('onboarding.use-case');
+    }
 
-//     $user = auth()->user();
+    public function saveUseCase(SaveUseCaseRequest $request)
+    {
+        $user = auth()->user();
 
-//     $user->profile()->updateOrCreate(
-//         ['user_id' => $user->id],
-//         [
-//             'business_type' => $request->business_type,
-//         ]
-//     );
+        $this->onboarding->saveUseCase($user, $request->validated('business_type'));
 
-//     return redirect('/profile/create');
-// }
-public function saveUseCase(Request $request)
-{
-    $request->validate([
-        'business_type' => 'required'
-    ]);
-
-    $user = auth()->user();
-
-    $user->profile()->updateOrCreate(
-        [],
-        [
-            'business_type' => $request->business_type,
-        ]
-    );
-
-    return redirect('/profile/create');
-}
+        return redirect('/profile/create');
+    }
 }

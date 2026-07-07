@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $group->name }}</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%232563eb'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%230B3D2E'/><path fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'/></svg>">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; }
+        body { font-family: sans-serif; background: #f9fafb; }
 
         #chat-wrap {
             display: flex;
@@ -19,6 +19,7 @@
             border-left: 1px solid #e5e7eb;
             border-right: 1px solid #e5e7eb;
             position: relative;
+            background: #fff;
         }
 
         #chat-main {
@@ -35,11 +36,12 @@
             align-items: center;
             gap: 12px;
             position: relative;
+            background: #fff;
         }
-        #chat-header a { font-size:13px; color:#3b82f6; text-decoration:none }
+        #chat-header a { font-size:13px; color:#2D6A4F; text-decoration:none; font-weight:500; }
         #chat-header .avatar {
             width:38px; height:38px; border-radius:50%;
-            background:#dbeafe; display:flex; align-items:center;
+            background:rgba(45,106,79,0.1); display:flex; align-items:center;
             justify-content:center; font-size:16px; overflow:hidden; flex-shrink:0;
         }
         #chat-header .avatar img { width:100%; height:100%; object-fit:cover }
@@ -67,7 +69,7 @@
             line-height: 1.5;
             word-break: break-word;
         }
-        .mine   .bubble { background:#3b82f6; color:#fff; border-bottom-right-radius:4px }
+        .mine   .bubble { background: linear-gradient(135deg, #0B3D2E, #2D6A4F); color:#fff; border-bottom-right-radius:4px }
         .theirs .bubble { background:#fff; color:#111; border-bottom-left-radius:4px;
                           border:1px solid #e5e7eb }
 
@@ -89,19 +91,21 @@
             resize: none;
             outline: none;
             font-family: sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        #msg-input:focus { border-color:#3b82f6 }
+        #msg-input:focus { border-color:#2D6A4F; box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1); }
         #send-btn {
             padding: 10px 22px;
-            background: #3b82f6;
+            background: linear-gradient(135deg, #0B3D2E, #2D6A4F);
             color: #fff;
             border: none;
             border-radius: 22px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
+            transition: opacity 0.2s;
         }
-        #send-btn:hover { background:#2563eb }
+        #send-btn:hover { opacity: 0.9; }
 
         .member-row {
             display: flex;
@@ -113,27 +117,27 @@
         .member-row:hover { background:#f9fafb }
         .member-avatar {
             width:32px; height:32px; border-radius:50%;
-            background:#dbeafe; display:flex; align-items:center;
+            background:rgba(45,106,79,0.1); display:flex; align-items:center;
             justify-content:center; font-size:13px; font-weight:700;
-            color:#1d4ed8; flex-shrink:0;
+            color:#2D6A4F; flex-shrink:0;
         }
-        .member-name { font-size:13px; font-weight:500 }
-        .member-role { font-size:11px; color:#f59e0b; font-weight:600 }
+        .member-name { font-size:13px; font-weight:500; color:#111827 }
+        .member-role { font-size:11px; color:#2D6A4F; font-weight:600 }
         .remove-btn {
             background:none; border:none; color:#d1d5db;
             cursor:pointer; font-size:14px; padding:2px 4px;
         }
         .remove-btn:hover { color:#ef4444 }
         .btn-add {
-            width:100%; padding:8px; background:#3b82f6; color:#fff;
+            width:100%; padding:8px; background: linear-gradient(135deg, #0B3D2E, #2D6A4F); color:#fff;
             border:none; border-radius:8px; font-size:13px;
-            font-weight:600; cursor:pointer; margin-bottom:8px;
+            font-weight:600; cursor:pointer; margin-bottom:8px; transition: opacity 0.2s;
         }
-        .btn-add:hover { background:#2563eb }
+        .btn-add:hover { opacity: 0.9; }
         .btn-delete {
             width:100%; padding:8px; background:#fff; color:#ef4444;
             border:1px solid #ef4444; border-radius:8px; font-size:13px;
-            font-weight:600; cursor:pointer;
+            font-weight:600; cursor:pointer; transition: background 0.2s;
         }
         .btn-delete:hover { background:#fef2f2 }
     </style>
@@ -155,7 +159,7 @@
                 @endif
             </div>
             <div style="flex:1">
-                <div style="font-weight:600;font-size:15px">{{ $group->name }}</div>
+                <div style="font-weight:600;font-size:15px; color:#111827">{{ $group->name }}</div>
                 <div style="font-size:11px;color:#9ca3af" id="online-count">
                     {{ $members->count() }} members
                 </div>
@@ -163,9 +167,10 @@
 
             {{-- Members toggle button inside header --}}
             <button onclick="toggleSidebar()"
-                    style="margin-left:auto;background:#3b82f6;color:#fff;border:none;
+                    style="margin-left:auto;background:linear-gradient(135deg, #0B3D2E, #2D6A4F);color:#fff;border:none;
                            border-radius:20px;padding:7px 14px;font-size:13px;
-                           font-weight:500;cursor:pointer;flex-shrink:0">
+                           font-weight:500;cursor:pointer;flex-shrink:0; transition: opacity 0.2s;"
+                    onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
                 👥 Members
             </button>
         </div>
@@ -238,7 +243,8 @@
                 @csrf
                 <select name="user_id"
                         style="width:100%;padding:8px 10px;border:1px solid #d1d5db;
-                               border-radius:8px;font-size:13px;margin-bottom:8px;outline:none">
+                               border-radius:8px;font-size:13px;margin-bottom:8px;outline:none; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='#2D6A4F'" onblur="this.style.borderColor='#d1d5db'">
                     @foreach(\App\Models\User::whereNotIn('id', $members->pluck('id'))->get() as $u)
                         <option value="{{ $u->id }}">{{ $u->name }}</option>
                     @endforeach

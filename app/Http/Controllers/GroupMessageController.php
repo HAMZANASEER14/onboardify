@@ -2,38 +2,24 @@
 namespace App\Http\Controllers;
 
 use App\Events\GroupMessageSent;
+use App\Http\Requests\StoreGroupMessageRequest;
 use App\Models\Group;
-use App\Models\GroupMessage;
-use Illuminate\Http\Request;
+use App\Repositories\Contracts\GroupRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 
 class GroupMessageController extends Controller
 {
-    public function store(Request $request, Group $group)
+    public function __construct(private GroupRepositoryInterface $groups) {}
+
+    public function store(StoreGroupMessageRequest $request, Group $group)
     {
-        // Only members can send
-        abort_unless(
-            $group->members()->where('user_id', Auth::id())->exists(),
-            403
+        $message = $this->groups->createMessage(
+            $group,
+            Auth::id(),
+            $request->validated(),
+            $request->file('attachment')
         );
 
-        $request->validate([
-            'message'    => 'required_without:attachment|string|nullable',
-            'attachment' => 'nullable|file|max:5120',
-        ]);
-
-        $data = [
-            'group_id' => $group->id,
-            'user_id'  => Auth::id(),
-            'message'  => $request->message,
-        ];
-
-        if ($request->hasFile('attachment')) {
-            $data['attachment'] = $request->file('attachment')
-                                          ->store('group-attachments', 'public');
-        }
-
-        $message = GroupMessage::create($data);
         $message->load('user');
 
         broadcast(new GroupMessageSent($message))->toOthers();

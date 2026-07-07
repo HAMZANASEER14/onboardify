@@ -1,19 +1,22 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreGroupRequest;
+use App\Http\Requests\AddMemberRequest;
 use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\User;
+use App\Repositories\Contracts\GroupRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class GroupController extends Controller
 {
+    public function __construct(private GroupRepositoryInterface $groups) {}
+
     public function index()
     {
-        $groups = Auth::user()->groups()->withCount('members')
-                      ->with('latestMessage.user')
-                      ->get();
+        $groups = $this->groups->getForUser(Auth::user());
 
         return view('groups.index', compact('groups'));
     }
@@ -24,41 +27,12 @@ class GroupController extends Controller
         return view('groups.create', compact('users'));
     }
 
-    public function store(Request $request)
+    public function store(StoreGroupRequest $request)
     {
-        $request->validate([
-            'name'        => 'required|string|max:100',
-            'description' => 'nullable|string|max:255',
-            'members'     => 'required|array|min:1',
-            'members.*'   => 'exists:users,id',
-            'avatar'      => 'nullable|image|max:2048',
-        ]);
+        $group = $this->groups->create($request->validated(), auth()->user());
 
-        $data = $request->only(['name', 'description']);
-        $data['created_by'] = Auth::id();
-
-        if ($request->hasFile('avatar')) {
-            $data['avatar'] = $request->file('avatar')->store('groups', 'public');
-        }
-
-        $group = Group::create($data);
-
-        // Add creator as admin
-        $group->members()->create([
-            'user_id' => Auth::id(),
-            'role'    => 'admin',
-        ]);
-
-        // Add selected members
-        foreach ($request->members as $userId) {
-            $group->members()->create([
-                'user_id' => $userId,
-                'role'    => 'member',
-            ]);
-        }
-
-        return redirect()->route('groups.show', $group)
-                         ->with('success', 'Group created!');
+        return redirect()->route('groups.show', $group->id)
+            ->with('success', 'Group created successfully!');
     }
 
     public function show(Group $group)
@@ -82,15 +56,9 @@ class GroupController extends Controller
         return view('groups.show', compact('group', 'messages', 'members', 'isAdmin'));
     }
 
-    public function addMember(Request $request, Group $group)
+    public function addMember(AddMemberRequest $request, Group $group)
     {
-        abort_unless($group->isAdmin(Auth::id()), 403);
-
-        $request->validate(['user_id' => 'required|exists:users,id']);
-
-        $group->members()->firstOrCreate([
-            'user_id' => $request->user_id,
-        ], ['role' => 'member']);
+        $this->groups->addMember($group, $request->validated('user_id'));
 
         return back()->with('success', 'Member added.');
     }
@@ -99,7 +67,7 @@ class GroupController extends Controller
     {
         abort_unless($group->isAdmin(Auth::id()), 403);
 
-        $group->members()->where('user_id', $user->id)->delete();
+        $this->groups->removeMember($group, $user);
 
         return back()->with('success', 'Member removed.');
     }
@@ -108,7 +76,7 @@ class GroupController extends Controller
     {
         abort_unless($group->isAdmin(Auth::id()), 403);
 
-        $group->delete();
+        $this->groups->delete($group);
 
         return redirect()->route('groups.index')->with('success', 'Group deleted.');
     }

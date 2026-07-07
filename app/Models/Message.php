@@ -11,6 +11,9 @@ class Message extends Model
         'conversation_id',
         'user_id',
         'content',
+        'file_path',
+        'file_name',
+        'file_type',
         'is_read',
     ];
 

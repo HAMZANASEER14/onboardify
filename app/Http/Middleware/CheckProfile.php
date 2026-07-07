@@ -8,18 +8,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckProfile
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-         $user = auth()->user();
+        $user = auth()->user();
 
-    if ($user && !$user->profile) {
-        return redirect('/profile/create');
-    }
+        // If user has no profile AND is not already on the profile creation page
+        if ($user && !$user->profile && !$request->routeIs('profile.create')) {
+            return redirect()->route('profile.create');
+        }
+
         return $next($request);
     }
 }

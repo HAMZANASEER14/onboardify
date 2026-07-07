@@ -3,7 +3,6 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
-
 window.Echo = new Echo({
     broadcaster:       'reverb',
     key:               import.meta.env.VITE_REVERB_APP_KEY,
@@ -21,3 +20,8 @@ window.Echo.connector.pusher.connection.bind('connected', () => {
 window.Echo.connector.pusher.connection.bind('error', (err) => {
     console.error('❌ Reverb error:', err);
 });
+ 
+const userId = document.querySelector('meta[name="user-id"]');
+if (window.Echo && userId) {
+    window.Echo.join('presence-online');
+}

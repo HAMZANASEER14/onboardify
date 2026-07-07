@@ -28,6 +28,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'role',
+        'team_id',
+        'company_id',   
+    'joined_at',
+    'company_id',
     ];
 
     /**
@@ -49,6 +54,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'joined_at'         => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -73,5 +79,28 @@ public function groups()
 public function sendEmailVerificationNotification(): void
 {
     $this->notify(new VerifyEmailNotification());
+}
+// The team/company the user belongs to
+public function team()
+{
+    return $this->belongsTo(Team::class);
+}
+
+// Tasks assigned TO this user (for employees)
+public function assignedTasks()
+{
+    return $this->hasMany(Task::class, 'assigned_to');
+}
+
+// Tasks created BY this user (for admins)
+public function createdTasks()
+{
+    return $this->hasMany(Task::class, 'assigned_by');
+}
+
+// Salary slips for this user
+public function salarySlips()
+{
+    return $this->hasMany(SalarySlip::class);
 }
 }

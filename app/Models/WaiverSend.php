@@ -28,4 +28,8 @@ protected $fillable = [
 {
     return $this->belongsTo(Client::class, 'client_id');
 }
+public function submission()
+{
+    return $this->hasOne(WaiverSubmission::class, 'token', 'token');
+}
 }

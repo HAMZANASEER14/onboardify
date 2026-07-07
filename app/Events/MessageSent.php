@@ -36,6 +36,11 @@ class MessageSent implements ShouldBroadcastNow
             'sender_name'     => $this->message->user->name,
             'content'         => $this->message->content,
             'created_at'      => $this->message->created_at->format('h:i A'),
+            'file_path' => $this->message->file_path
+                ? asset('storage/' . $this->message->file_path)
+                : null,
+'file_name' => $this->message->file_name,
+'file_type' => $this->message->file_type,
         ];
     }
 }

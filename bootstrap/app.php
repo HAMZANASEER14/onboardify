@@ -12,10 +12,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-    $middleware->alias([
-        'prevent.back' => \App\Http\Middleware\PreventBackHistory::class,
+        $middleware->validateCsrfTokens(except: [
+        'broadcasting/auth',
     ]);
-})
+    $middleware->alias([
+        'prevent.back' => \App\Http\Middleware\PreventBack::class,
+         'role' => \App\Http\Middleware\CheckRole::class,
+          'check.profile' => \App\Http\Middleware\CheckProfile::class,
+          'check.subscription'  => \App\Http\Middleware\CheckSubscription::class,
+          'require.subscription' => \App\Http\Middleware\RequireSubscription::class,
+    ]);
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
+    

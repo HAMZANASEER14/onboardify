@@ -7,7 +7,14 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
-
+Broadcast::channel('presence-online', function ($user) {
+    // Return user data — this is what Echo's here()/joining()/leaving() receives
+    // Returning null/false blocks the user from joining (e.g. unauthenticated)
+    return [
+        'id'   => $user->id,
+        'name' => $user->name,
+    ];
+});
 Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
     $conv = Conversation::find($conversationId);
 

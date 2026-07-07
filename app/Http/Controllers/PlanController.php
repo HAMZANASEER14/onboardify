@@ -2,24 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Plan;
+use App\Http\Requests\SelectPlanRequest;
+use App\Repositories\Contracts\PaymentRepositoryInterface;
 
 class PlanController extends Controller
 {
+    public function __construct(private PaymentRepositoryInterface $payments) {}
+
     public function index()
-{
-    $plans = Plan::all();
-    return view('plans.index', compact('plans'));
-}
-public function select(Request $request)
-{
-    $request->validate([
-        'plan_id' => 'required|exists:plans,id',
-    ]);
+    {
+        // ✅ If already subscribed, skip to dashboard
+        $subscription = $this->payments->getActiveSubscription(auth()->id());
 
-    session(['plan_id' => $request->plan_id]);
+        if ($subscription) {
+            return redirect()->route('admin.dashboard');
+        }
 
-    return redirect('/payment');
-}
+        $plans = $this->payments->getAllPlans();
+        return view('plans.index', compact('plans'));
+    }
+
+    public function select(SelectPlanRequest $request)
+    {
+        $this->payments->selectPlan($request->plan_id);
+
+        return redirect('/payment');
+    }
 }

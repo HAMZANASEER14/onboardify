@@ -1,67 +1,46 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Events\MessageSent;
+use App\Http\Requests\SendMessageRequest;
 use App\Models\Conversation;
 use App\Models\User;
+use App\Repositories\Contracts\ChatRepositoryInterface;
 use Illuminate\Http\Request;
-
 class ChatController extends Controller
 {
-    // Show list of all users to start a chat with
+    public function __construct(private ChatRepositoryInterface $chats) {}
+
     public function index()
     {
-        $users = User::where('id', '!=', auth()->id())->get();
-        return view('chat.index', compact('users'));
+        $authId = auth()->id();
+        $users  = User::where('id', '!=', $authId)->get();
+        $unreadCounts = $this->chats->getUnreadCounts($authId);
+
+        return view('chat.index', compact('users', 'unreadCounts'));
     }
 
-    // Open a conversation with a specific user
     public function show(User $user)
     {
-        $conversation = Conversation::between(
-            auth()->id(),
-            $user->id
-        );
+        $conversation = $this->chats->getConversationBetween(auth()->id(), $user->id);
 
-        // Mark their messages as read
-        $conversation->messages()
-            ->where('user_id', $user->id)
-            ->where('is_read', false)
-            ->update(['is_read' => true]);
+        $this->chats->markMessagesRead($conversation, $user->id);
 
-        $messages = $conversation->messages()->with('user')->get();
+        $messages = $this->chats->getMessagesWithSender($conversation);
 
-        return view('chat.show', compact(
-            'conversation', 'messages', 'user'
-        ));
-
-       
+        return view('chat.show', compact('conversation', 'messages', 'user'));
     }
 
-    // Receive and save a new message
-    public function send(Request $request, Conversation $conversation)
+    public function send(SendMessageRequest $request, Conversation $conversation)
     {
-        // Make sure this user belongs to this conversation
-        abort_if(
-            $conversation->sender_id !== auth()->id() &&
-            $conversation->receiver_id !== auth()->id(),
-            403
+        $message = $this->chats->storeMessage(
+            $conversation,
+            auth()->id(),
+            $request->validated(),
+            $request->file('file')
         );
-
-        $request->validate([
-            'content' => 'required|string|max:2000',
-        ]);
-
-        // Save to database
-        $message = $conversation->messages()->create([
-            'user_id' => auth()->id(),
-           'content' => $request->input('content'),
-        ]);
 
         $message->load('user');
 
-        // Push to both users via Reverb
         broadcast(new MessageSent($message))->toOthers();
 
         return response()->json([
@@ -69,22 +48,26 @@ class ChatController extends Controller
             'content'     => $message->content,
             'sender_name' => $message->user->name,
             'created_at'  => $message->created_at->format('h:i A'),
+            'file_path'   => $message->file_path ? asset('storage/' . $message->file_path) : null,
+            'file_name'   => $message->file_name,
+            'file_type'   => $message->file_type,
         ]);
     }
+
     public function typing(Conversation $conversation)
-{
-    abort_if(
-        $conversation->sender_id !== auth()->id() &&
-        $conversation->receiver_id !== auth()->id(),
-        403
-    );
+    {
+        abort_if(
+            $conversation->sender_id !== auth()->id() &&
+            $conversation->receiver_id !== auth()->id(),
+            403
+        );
 
-    broadcast(new \App\Events\UserTyping(
-        $conversation->id,
-        auth()->id(),
-        auth()->user()->name
-    ))->toOthers(); // don't send it back to yourself
+        broadcast(new \App\Events\UserTyping(
+            $conversation->id,
+            auth()->id(),
+            auth()->user()->name
+        ))->toOthers();
 
-    return response()->json(['status' => 'ok']);
-}
+        return response()->json(['status' => 'ok']);
+    }
 }

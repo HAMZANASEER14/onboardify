@@ -6,34 +6,32 @@ use App\Models\Client;
 use Illuminate\Http\Request;
 use App\Models\WaiverInvitation;
 use App\Models\Waiver;              
-// use App\Models\WaiverInvitation;
 use Illuminate\Support\Str;
-
+use App\Http\Requests\UpdateClientRequest;
+use App\Repositories\Contracts\ClientRepositoryInterface;
+use App\Repositories\Contracts\WaiverRepositoryInterface;
 
 class ClientController extends Controller
 {
-    public function index()
-    {
-        $clients = Client::where('user_id', auth()->id())
-                         ->latest()
-                         ->paginate(15); // ✅ paginated
-        return view('clients.index', compact('clients'));
-    }
-//     public function create()
-// {
-//     // Clients are auto-created when sending waivers
-//     return redirect()->route('waivers.index')
-//            ->with('info', 'Add clients by sending a waiver.');
-// }
+    public function __construct(
+    protected ClientRepositoryInterface $clients,
+    protected WaiverRepositoryInterface $waivers
+) {}
+   public function index()
+{
+    $userId = auth()->id();
 
-    public function create()
-    {
-        $waivers = Waiver::where('user_id', auth()->id())
-                         ->where('status', 'published')
-                         ->get();
+    $clients = Client::where('user_id', $userId)->latest()->paginate(15);
+    $activeCount = Client::where('user_id', $userId)->where('status', 'active')->count();
+    $addedThisMonth = Client::where('user_id', $userId)->where('created_at', '>=', now()->startOfMonth())->count();
 
-        return view('clients.create', compact('waivers'));
-    }
+    return view('clients.index', compact('clients', 'activeCount', 'addedThisMonth'));
+}
+  public function create()
+{
+    $waivers = $this->waivers->publishedForUser(auth()->id());
+    return view('clients.create', compact('waivers'));
+}
 
     public function store(Request $request)
     {
@@ -52,29 +50,6 @@ class ClientController extends Controller
         ]);
         return redirect()->route('clients.index')->with('success', 'Client added!');
     }
-
-    //     // If a waiver was selected, generate invitation
-    //     if ($request->waiver_id) {
-    //         $token = Str::uuid();
-
-    //         WaiverInvitation::create([
-    //             'client_id' => $client->id,
-    //             'waiver_id' => $request->waiver_id,
-    //             'user_id'   => auth()->id(),
-    //             'token'     => $token,
-    //         ]);
-
-    //         $link = url('/sign/' . $token);
-
-    //         return redirect()->route('clients.invitation', [
-    //             'client' => $client->id,
-    //             'token'  => $token,
-    //         ]);
-    //     }
-
-    //     return redirect()->route('clients.index')->with('success', 'Client added!');
-    // }
-
     public function show(Client $client)
     {
         return view('clients.show', compact('client'));
@@ -84,29 +59,16 @@ class ClientController extends Controller
     {
         return view('clients.edit', compact('client'));
     }
+    public function update(UpdateClientRequest $request, Client $client)
+        {
+                // Update the client model with validated data from the request
+                $client->update($request->validated());
 
-    public function update(Request $request, Client $client)
-    {
-        $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-        ]);
-
-        $client->update($request->only('name', 'email', 'status'));
-
-        return redirect()->route('clients.index')->with('success', 'Client updated!');
-    }
-
-    public function destroy(Client $client)
+                return redirect()->route('clients.index')->with('success', 'Client updated!');
+        }
+   public function destroy(Client $client)
     {
         $client->delete();
         return redirect()->route('clients.index')->with('success', 'Client deleted!');
     }
-//     public function invitation(Client $client, string $token)
-// {
-//     $invitation = WaiverInvitation::where('token', $token)->firstOrFail();
-//     $link = url('/sign/' . $token);
-
-//     return view('clients.invitation', compact('client', 'invitation', 'link', 'token'));
-// }
 }

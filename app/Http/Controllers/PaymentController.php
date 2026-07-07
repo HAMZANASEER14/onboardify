@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\CreatePaymentIntentRequest;
+use App\Http\Requests\ProcessPaymentRequest;
 use App\Models\Plan;
-use App\Models\Subscription;
+use App\Repositories\Contracts\PaymentRepositoryInterface;
 
 class PaymentController extends Controller
 {
-    // ── Show Payment Page ─────────────────────────────────────────
+    public function __construct(private PaymentRepositoryInterface $payments) {}
+
     public function index()
     {
-        if (!session()->has('plan_id')) {
-            return redirect('/plans');
-        }
-
-        $plan = Plan::find(session('plan_id'));
+        $plan = $this->payments->findPlanForSession();
 
         if (!$plan) {
             return redirect('/plans');
@@ -24,36 +22,54 @@ class PaymentController extends Controller
         return view('payment.index', compact('plan'));
     }
 
-    // ── Process Fake Payment ──────────────────────────────────────
-    public function processPayment(Request $request)
+    // Step 1: Create PaymentIntent, return client_secret to JS
+    public function createIntent(CreatePaymentIntentRequest $request)
     {
-        $request->validate([
-            'plan_id' => 'required|exists:plans,id',
-        ]);
-
-        $user = auth()->user();
         $plan = Plan::findOrFail($request->plan_id);
 
-        // Save subscription to DB (no Stripe)
-        Subscription::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'plan_id' => $plan->id,
-                'status'  => 'active',
-                'paid_at' => now(),
-            ]
-        );
+        try {
+            $result = $this->payments->createPaymentIntent($plan, auth()->id());
 
-        session()->forget('plan_id');
-
-        return redirect('/dashboard')
-            ->with('success', '🎉 Your 7-day free trial has started!');
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
     }
 
-    // ── Success ───────────────────────────────────────────────────
+    public function processPayment(ProcessPaymentRequest $request)
+    {
+        try {
+            $paymentIntent = $this->payments->retrievePaymentIntent($request->payment_intent_id);
+
+            if ($paymentIntent->status !== 'succeeded') {
+                return response()->json(['error' => 'Payment not confirmed by Stripe.'], 422);
+            }
+
+            // ── Verify this PaymentIntent actually belongs to this user and this plan ──
+            if (
+                ($paymentIntent->metadata->user_id ?? null) != auth()->id() ||
+                ($paymentIntent->metadata->plan_id ?? null) != $request->plan_id
+            ) {
+                return response()->json(['error' => 'Payment does not match this user or plan.'], 422);
+            }
+
+            // ── Verify the amount charged matches the plan's actual price ──
+            $plan = Plan::findOrFail($request->plan_id);
+            if ($paymentIntent->amount !== (int) round($plan->price * 100)) {
+                return response()->json(['error' => 'Payment amount mismatch.'], 422);
+            }
+
+            $this->payments->activateSubscription(auth()->id(), $request->plan_id, $request->payment_intent_id);
+
+            return response()->json(['success' => true]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
     public function success()
     {
-        return redirect('/dashboard')
-            ->with('success', '🎉 Payment successful!');
+        return redirect('/dashboard')->with('success', '🎉 Payment successful!');
     }
 }
