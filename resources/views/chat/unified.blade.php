@@ -140,8 +140,50 @@
             background: #071018 !important;
         }
 
+        /* Ensure right-side panel and iframe fill available height and allow flex children to scroll */
+        #chat-container {
+            height: 100%;
+        }
+
+        #chat-container,
+        #main-panel,
+        #chat-frame {
+            min-height: 0;
+        }
+
         #chat-frame {
             color-scheme: dark;
+            height: 100%;
+            display: block;
+        }
+
+        /* Force page to occupy full height and remove any bottom spacing that shows as white */
+        html,
+        body {
+            height: 100%;
+            background: #071018 !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Remove bottom padding reserved by layout container */
+        div[class*="px-4"][class*="pb-6"] {
+            padding-bottom: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* Ensure chat wrapper reaches the very bottom */
+        #chat-wrapper {
+            height: calc(100vh - 60px) !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* Hide global footer if present */
+        footer {
+            display: none !important;
         }
     </style>
 @endpush
@@ -304,7 +346,7 @@
             {{-- ══════════════════════════
              MAIN CHAT PANEL
         ══════════════════════════ --}}
-            <div id="chat-container" class="flex-1 flex-col min-w-0 hidden md:flex">
+            <div id="chat-container" class="flex-1 flex-col min-w-0 h-full hidden md:flex">
 
                 <div class="md:hidden flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-white shrink-0">
                     <button onclick="goBackToList()"
