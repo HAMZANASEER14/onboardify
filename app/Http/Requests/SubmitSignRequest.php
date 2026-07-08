@@ -16,7 +16,6 @@ class SubmitSignRequest extends FormRequest
         return [
             'signer_name'  => 'sometimes|string|max:255',
             'signer_email' => 'sometimes|email|max:255',
-            'signature'    => $this->input('signature'), // preserved exactly as original — this is a pre-existing quirk, not a rule
-        ];
+'signature'    => 'required|string',        ];
     }
 }

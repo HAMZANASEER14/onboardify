@@ -17,6 +17,7 @@ use App\Http\Controllers\ChatUnifiedController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\BulkInviteController;
+use App\Http\Controllers\ClientPortalController;
 
 Route::get('/', fn() => view('welcome'));
 Route::get('/log',fn() => redirect()->route('login'));
@@ -219,7 +220,18 @@ Route::get('/invites', [BulkInviteController::class, 'index'])
     ->name('admin.invites.index');
 
 Route::post('/invites/{invite}/remind', [App\Http\Controllers\Admin\BulkInviteController::class, 'remind'])
+
     ->name('admin.invites.remind');
+    Route::post('/bulk-invite', [App\Http\Controllers\Admin\BulkInviteController::class, 'process'])
+    ->name('admin.bulk-invite.process');
+
+Route::get('/invites', [BulkInviteController::class, 'index'])
+    ->name('admin.invites.index');
+
+Route::post('/invites/{invite}/remind', [App\Http\Controllers\Admin\BulkInviteController::class, 'remind'])
+    ->name('admin.invites.remind');
+    Route::post('/invites/{invite}/resend', [App\Http\Controllers\Admin\BulkInviteController::class, 'resend'])
+        ->name('admin.invites.resend');
 }); // ← Close admin group
 
 // ── EMPLOYEE ROUTES ───────────────────────────────────────────────
@@ -244,8 +256,9 @@ Route::get('/salary/{salarySlip}/download', [\App\Http\Controllers\Admin\SalaryS
 // ── CLIENT ROUTES ─────────────────────────────────────────────────
 Route::middleware(['auth', 'check.profile', 'role:client'])->prefix('client')->group(function () {
     
-    Route::get('/portal', function () {
-        return view('client.portal');
-    })->name('client.portal');
+    Route::get('/portal', [ClientPortalController::class, 'index'])->name('client.portal');
+        Route::get('/documents', [ClientPortalController::class, 'myDocuments'])->name('client.waivers');
 
-}); // ← Close client group
+
+});
+// ← Close client group

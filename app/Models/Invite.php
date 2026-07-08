@@ -14,9 +14,11 @@ class Invite extends Model
         'failure_reason',
         'source',
         'joined_at',
+        'expires_at',
     ];
     protected $casts = [
         'joined_at' => 'datetime',
+        'expires_at' => 'datetime',
     ];
     public function admin()
     {

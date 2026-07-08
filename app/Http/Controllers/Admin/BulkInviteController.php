@@ -23,6 +23,8 @@ class BulkInviteController extends Controller
     {
         $admin = Auth::user();
         $count = 0;
+         $invalidEmails   = [];
+    $duplicateEmails = [];
 
         // ✅ 1. Get the role from the form (default to 'employee' if missing)
         $inviteRole = $request->input('role', 'employee');
@@ -35,15 +37,22 @@ class BulkInviteController extends Controller
         if ($request->invite_method === 'manual') {
 
             $emails = preg_split('/[\s,;]+/', $request->manual_emails);
-
+$row = 0;
             foreach ($emails as $email) {
+                $row++;
                 $email = trim($email);
                 if (empty($email)) continue;
 
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     $this->invites->createFailed($admin->id, $email, $inviteRole, 'Invalid email format', 'manual');
+                                    $invalidEmails[] = ['email' => $email, 'reason' => 'Invalid email format'];
+
                     continue;
                 }
+                        if ($this->invites->alreadyInvited($admin->id, $email)) {
+                $duplicateEmails[] = ['email' => $email, 'row' => $row];
+                continue;
+            }
 
                 $invite = $this->invites->createPending($admin->id, $email, $inviteRole, 'manual');
 
@@ -51,37 +60,49 @@ class BulkInviteController extends Controller
                 $count++;
             }
 
-            return back()->with('success', "Success! {$count} {$inviteRole} invites are being sent in the background.");
-        }
+    } else {
 
-        // ── CSV INVITE ──
         $file   = $request->file('csv_file');
         $handle = fopen($file->getRealPath(), 'r');
         fgetcsv($handle); // Skip header
-
+ $row = 1;
         while (($data = fgetcsv($handle, 1000, ',')) !== false) {
-            $email = trim($data[0]);
+            $row++;
+            $email = trim($data[0] ?? '');
             if (empty($email)) continue;
-
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->invites->createFailed($admin->id, $email, $inviteRole, 'Invalid email format', 'csv');
+                $invalidEmails[] = ['email' => $email, 'reason' => 'Invalid email format'];
+                continue;
+            }
+
+            if ($this->invites->alreadyInvited($admin->id, $email)) {
+                $duplicateEmails[] = ['email' => $email, 'row' => $row];
                 continue;
             }
 
             $invite = $this->invites->createPending($admin->id, $email, $inviteRole, 'csv');
-
             SendInviteJob::dispatch($invite);
             $count++;
         }
 
         fclose($handle);
+    }
 
-        return back()->with('success', "Success! {$count} {$inviteRole} invites are being sent in the background.");
+            return back()
+        ->with('success', "Success! {$count} {$inviteRole} invites are being sent in the background.")
+        ->with('invalid_emails', $invalidEmails)
+        ->with('duplicate_emails', $duplicateEmails);
     }
 
     public function index()
     {
-        $invites = $this->invites->paginateAll();
+        $invites = $this->invites->paginateForAdmin(Auth::id());
         return view('admin.invites.index', compact('invites'));
     }
+    public function resend(Invite $invite)
+{
+    $this->invites->resend($invite);
+    return back()->with('success', 'Invite resent to ' . $invite->email);
+}
 }
